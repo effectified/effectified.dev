@@ -215,7 +215,7 @@ export function tarballUrl(family: Family, pkg: Package): string {
 	return `${family.release.base}/${family.scope.slice(1)}-${pkg.name}-${family.release.version}.tgz`;
 }
 
-/** A library the engine has effectified, tested and released (effectified/engine, targets/ and its releases). */
+/** A library the engine has effectified, tested and released (effectified/packages, targets/ and its releases). */
 export interface EngineTarget {
 	readonly library: string;
 	readonly version: string;
@@ -224,7 +224,7 @@ export interface EngineTarget {
 	/** npm's weekly downloads of the library, read on 2026-11-26 (the week of 2026-11-19 to 25). */
 	readonly weekly: number;
 	readonly facade: string;
-	/** The GitHub release of effectified/engine the facade installs from. */
+	/** The GitHub release of effectified/packages the facade installs from. */
 	readonly release: string;
 	/** The target's directory under targets/. */
 	readonly directory: string;

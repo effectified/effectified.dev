@@ -54,7 +54,7 @@ const answer = Effect.gen(function* () {
   Effect.provide(Models.layer([anthropicProvider()])),
 );`;
 
-// An excerpt of targets/nodemailer/recipe.json in effectified/engine, as the engine drafted it.
+// An excerpt of targets/nodemailer/recipe.json in effectified/packages, as the engine drafted it.
 const recipe = `{
   "exports": ["createTransport", "createTestAccount"],
   "handles": { "Mail": { "release": "close", "events": [] } },
@@ -62,7 +62,7 @@ const recipe = `{
   "services": [{ "name": "NodemailerMail", "handle": "Mail", "acquire": "createTransport" }]
 }`;
 
-const make = `node src/bin.ts make https://github.com/taskforcesh/bullmq`;
+const make = `pnpm effectify make https://github.com/taskforcesh/bullmq`;
 
 const contract = [
 	["Effect, Stream or Layer", "Every public function returns one. No promise, callback or any in a public signature."],
@@ -315,15 +315,18 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 					from the library's own types, and {engineTests} behaviour tests run it against the real thing. {uiTargets} of
 					them are frontend libraries, made native to <a href="https://ui.effect.website">Effect UI</a>: web components
 					bound from their manifests, and charts, editors, maps and terminals as mounts that live with their element.
+					They live in <a href="https://github.com/effectified/packages">effectified/packages</a>, where anyone can add a
+					library: run the engine, review its recipe, write the tests, open a pull request.
 				</p>
 			</div>
 			<div class="family reveal">
 				<div class="family-head">
-					<h3>effectified/engine</h3>
+					<h3>effectified/packages</h3>
 					<div class="meta">
-						<span>TypeScript 7 · ast-grep · Effect 4</span>
+						<span>made by <a href="https://github.com/effectified/engine">effectified/engine</a> · TypeScript 7 · ast-grep · Effect 4</span>
 						<span>generated, tested in CI, released on GitHub</span>
-						<a href="https://github.com/effectified/engine">source</a>
+						<a href="https://github.com/effectified/packages">source</a>
+						<a href="https://github.com/effectified/packages/blob/main/CONTRIBUTING.md">contribute</a>
 					</div>
 				</div>
 				<table class="pkgs">
@@ -340,7 +343,7 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 						{ENGINE_TARGETS.map((target) => (
 							<tr>
 								<td class="name">
-									<a href={`https://github.com/effectified/engine/releases/tag/${encodeURIComponent(target.release)}`}>
+									<a href={`https://github.com/effectified/packages/releases/tag/${encodeURIComponent(target.release)}`}>
 										<span class="scope">@effectified/</span>
 										{target.facade.replace("@effectified/", "")}
 									</a>
@@ -349,7 +352,7 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 								<td class="kind kind-col">{weekly(target.weekly)}</td>
 								<td class="wraps wraps-col">{target.against} · {target.tests} tests</td>
 								<td>
-									<a href={`https://github.com/effectified/engine/tree/main/targets/${target.directory}`}>{target.library} {target.version}</a>: {target.exercises}.
+									<a href={`https://github.com/effectified/packages/tree/main/targets/${target.directory}`}>{target.library} {target.version}</a>: {target.exercises}.
 								</td>
 							</tr>
 						))}
@@ -371,7 +374,7 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 				follows the same contract, so what you learn on one carries to the next.
 			</p>
 			<div class="hero-actions">
-				<a class="btn btn-solid" href="https://github.com/effectified/effectified.dev/issues/new?title=Effectify%3A%20">Request a library</a>
+				<a class="btn btn-solid" href="https://github.com/effectified/packages/issues/new?title=Effectify%3A%20">Request a library</a>
 				<a class="btn btn-ghost" href="https://github.com/effectified">github.com/effectified</a>
 			</div>
 			<div class="closing-install">
