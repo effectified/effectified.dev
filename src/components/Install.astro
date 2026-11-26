@@ -1,0 +1,66 @@
+---
+// The install command of one package from its GitHub release, for npm, pnpm and Bun, with a copy button.
+// Every manager's command is in the page; without JavaScript the npm one shows and can be selected by hand.
+import { tarballUrl, type Family, type Package } from "../data/catalog";
+
+interface Props {
+	family: Family;
+	pkg: Package;
+}
+
+const { family, pkg } = Astro.props;
+const url = tarballUrl(family, pkg);
+const managers = [
+	{ id: "npm", command: `npm install --allow-remote=all ${url} effect` },
+	{ id: "pnpm", command: `pnpm add --config.block-exotic-subdeps=false ${url} effect` },
+	{ id: "bun", command: `bun add ${url} effect` },
+] as const;
+---
+
+<div class="install" data-install>
+	<div class="install-bar">
+		<div class="install-tabs" role="tablist" aria-label="Package manager">
+			{
+				managers.map((manager, index) => (
+					<button type="button" role="tab" aria-selected={index === 0 ? "true" : "false"} data-manager={manager.id}>
+						{manager.id}
+					</button>
+				))
+			}
+		</div>
+		<button type="button" class="install-copy" data-copy aria-label="Copy the install command">copy</button>
+	</div>
+	{
+		managers.map((manager, index) => (
+			<pre class="install-line" data-manager={manager.id} hidden={index !== 0}><span class="p">$</span> <code>{manager.command}</code></pre>
+		))
+	}
+</div>
+
+<script>
+	// Tabs switch every install box on the page at once, so the reader picks a manager one time; copy takes the
+	// visible command.
+	const boxes = document.querySelectorAll<HTMLElement>("[data-install]");
+	function choose(manager: string): void {
+		for (const box of boxes) {
+			for (const tab of box.querySelectorAll<HTMLElement>("[role=tab]")) {
+				tab.setAttribute("aria-selected", String(tab.dataset["manager"] === manager));
+			}
+			for (const line of box.querySelectorAll<HTMLElement>(".install-line")) {
+				line.hidden = line.dataset["manager"] !== manager;
+			}
+		}
+	}
+	for (const box of boxes) {
+		for (const tab of box.querySelectorAll<HTMLElement>("[role=tab]")) {
+			tab.addEventListener("click", () => choose(tab.dataset["manager"] ?? "npm"));
+		}
+		const copy = box.querySelector<HTMLElement>("[data-copy]");
+		copy?.addEventListener("click", async () => {
+			const command = box.querySelector<HTMLElement>(".install-line:not([hidden]) code")?.textContent ?? "";
+			await navigator.clipboard.writeText(command);
+			copy.textContent = "copied";
+			window.setTimeout(() => (copy.textContent = "copy"), 1600);
+		});
+	}
+</script>

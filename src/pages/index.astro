@@ -1,10 +1,20 @@
 ---
 // The landing page: what effectified is, one library before and after, the contract, the pipeline, the catalog.
 import { Code } from "astro:components";
+import Install from "../components/Install.astro";
 import Scene from "../components/Scene.astro";
 import Base from "../layouts/Base.astro";
-import { monochrome } from "../code-theme";
-import { FAMILIES, KINDS, totals, type Kind } from "../data/catalog";
+import { effectifiedDark } from "../code-theme";
+import { FAMILIES, KINDS, tarballUrl, totals, type Kind } from "../data/catalog";
+
+// The Pi family and its composition, the one package a product installs first.
+const [pi] = FAMILIES;
+if (pi === undefined) throw new Error("the catalog has no family");
+const thread = pi.packages.find((pkg) => pkg.kind === "composition");
+if (thread === undefined) throw new Error("the Pi family has no composition");
+
+// One colour per promise, from the code theme's palette.
+const TONES = ["#a78bfa", "#fb7185", "#fbbf24", "#38bdf8", "#34d399", "#22d3ee"] as const;
 
 const upstreamNames = [...new Set(FAMILIES.flatMap((family) => family.packages.flatMap((pkg) => pkg.wraps)))];
 
@@ -70,10 +80,11 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 >
 	<section class="hero">
 		<div class="hero-scene" aria-hidden="true"><Scene name="hero" eager class="scene-img" /></div>
+		<div class="hero-leak" aria-hidden="true"></div>
 		<div class="hero-scrim" aria-hidden="true"></div>
 		<div class="wrap hero-copy">
 			<span class="label">// Effect-native wrappers · <span class="warn">▲ alpha</span></span>
-			<h1><span class="fade">npm,</span><span class="dim">effectified.</span></h1>
+			<h1><span class="fade">npm,</span><span class="spectrum">effectified.</span></h1>
 			<p class="lede">
 				Effect-native packages for the libraries you already use. Typed errors, services as Layers, and
 				interruption that cancels the call. Types derived from upstream's own, so a new upstream release fails
@@ -111,14 +122,14 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 			<div class="compare reveal">
 				<div class="pane">
 					<div class="pane-head"><span class="label">@earendil-works/pi-ai</span><span class="label">promise</span></div>
-					<Code code={before} lang="ts" theme={monochrome} />
+					<Code code={before} lang="ts" theme={effectifiedDark} />
 					<div class="pane-foot">
 						<span class="sig quiet">Promise&lt;AssistantMessage&gt;: errors untyped, cancellation by hand</span>
 					</div>
 				</div>
 				<div class="pane pane-lit">
 					<div class="pane-head"><span class="label">@effectified/pi-ai</span><span class="label">effect</span></div>
-					<Code code={after} lang="ts" theme={monochrome} />
+					<Code code={after} lang="ts" theme={effectifiedDark} />
 					<div class="pane-foot">
 						<span class="sig pass"><b>✓</b> AssistantMessage</span>
 						<span class="sig fail"><b>!</b> ModelNotFound | ModelRequestError | TimeoutError</span>
@@ -144,7 +155,7 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 			<div class="promises">
 				{
 					contract.map(([title, text], index) => (
-						<div class="glass reveal" style={`--delay: ${index * 70}ms`}>
+						<div class="glass reveal" style={`--delay: ${index * 70}ms; --tone: ${TONES[index]}`}>
 							<span class="num">{String(index + 1).padStart(2, "0")}</span>
 							<h3>{title}</h3>
 							<p>{text}</p>
@@ -178,7 +189,7 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 						owns cancellation.
 					</p>
 					<span class="chip pass">✓ Today · by hand</span>
-					<Code code={recipe} lang="ts" theme={monochrome} />
+					<Code code={recipe} lang="ts" theme={effectifiedDark} />
 				</div>
 				<div class="station glass reveal" style="--delay: 90ms">
 					<span class="step">02 · GENERATOR</span>
@@ -224,6 +235,7 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 								<span>effect {family.effect}</span>
 								<span class="warn">▲ {family.status}</span>
 								<a href={family.repo}>source</a>
+								<a href={`${family.repo}/releases/tag/${family.release.tag}`}>release {family.release.tag}</a>
 							</div>
 						</div>
 						<table class="pkgs">
@@ -239,10 +251,19 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 								{family.packages.map((pkg) => (
 									<tr>
 										<td class="name">
-											<span class="scope">{family.scope}/</span>
-											{pkg.name}
+											{pkg.kind === "docs" ? (
+												<span>
+													<span class="scope">{family.scope}/</span>
+													{pkg.name}
+												</span>
+											) : (
+												<a href={tarballUrl(family, pkg)} title="Tarball of this release">
+													<span class="scope">{family.scope}/</span>
+													{pkg.name}
+												</a>
+											)}
 										</td>
-										<td class="kind kind-col">{pkg.kind}</td>
+										<td class={`kind kind-col k-${pkg.kind}`}>{pkg.kind}</td>
 										<td class="wraps wraps-col">{pkg.wraps.length > 0 ? pkg.wraps.join(", ") : "–"}</td>
 										<td>{pkg.summary}</td>
 									</tr>
@@ -256,13 +277,23 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 				{
 					kinds.map(([kind, text]) => (
 						<div>
-							<b>{kind}</b>
+							<b class={`k-${kind}`}>{kind}</b>
 							<p>{text}</p>
 						</div>
 					))
 				}
 			</div>
-			<p class="note"><span class="warn">▲</span><span>Not on npm yet: the first alpha of @effectified/pi-* is on its way.</span></p>
+			<div class="release reveal">
+				<div>
+					<span class="label">// Install from GitHub</span>
+					<p>
+						Released on GitHub, not npm. One URL installs a package with every effectified package it needs;
+						Pi and <code>effect</code> come from npm.{" "}
+						<a href={`${pi.repo}/releases/tag/${pi.release.tag}`}>{pi.release.tag} release notes</a>
+					</p>
+				</div>
+				<Install family={pi} pkg={thread} />
+			</div>
 		</div>
 	</section>
 
@@ -280,12 +311,8 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 				<a class="btn btn-solid" href="https://github.com/effectified/effectified.dev/issues/new?title=Effectify%3A%20">Request a library</a>
 				<a class="btn btn-ghost" href="https://github.com/effectified">github.com/effectified</a>
 			</div>
-			<div class="terminal">
-				<div class="terminal-bar" aria-hidden="true"><i></i><i></i><i></i></div>
-				<pre><span class="p"># the Pi family, from source until it is on npm</span>
-<span class="p">$</span> git clone https://github.com/effectified/pi
-<span class="p">$</span> cd pi && npm install --ignore-scripts
-<span class="p">$</span> npm run build</pre>
+			<div class="closing-install">
+				<Install family={pi} pkg={thread} />
 			</div>
 		</div>
 	</section>

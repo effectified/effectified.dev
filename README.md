@@ -44,8 +44,15 @@ are computed from it at build time; never write a number into the page by hand.
 ## Brand
 
 The EffectScript exhibition system on ink: Effect's zinc palette, Inter Display for headlines, Inter for body,
-JetBrains Mono for code and labels. Light is the only colour; the signal colours (✓ pass, ! fail, ▲ warn,
-◇ need) mark state only, always with their glyph.
+JetBrains Mono for code and labels. The photographs stay monochrome; colour comes from code, as on
+effect.website:
+
+- Code uses `effectified-dark` (`src/code-theme.ts`): violet keywords, emerald strings, cyan for Effect's modules and
+  types, blue functions, orange numbers, muted comments.
+- The accent is the spectrum violet → sky → emerald (`--spectrum`), used sparingly: the hero's "effectified.", the
+  ticker, the effectified code pane's edge and glow, and the light leak around the hero's cube.
+- Each promise and each package kind has one colour from the code palette, shown as a dot or a thin rule.
+- The signal colours (✓ pass, ! fail, ▲ warn, ◇ need) still mark state only, always with their glyph.
 
 The mark is two brackets closed around a solid square: a library, wrapped. It lives in
 [`public/mark.svg`](public/mark.svg) (`currentColor`) and [`public/favicon.svg`](public/favicon.svg). White on

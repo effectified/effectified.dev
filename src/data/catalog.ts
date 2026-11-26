@@ -21,6 +21,8 @@ export interface Family {
 	/** The npm scope of the family's packages. */
 	readonly scope: string;
 	readonly status: "alpha";
+	/** The GitHub release the packages install from: `<base>/<scope>-<name>-<version>.tgz`. */
+	readonly release: { readonly tag: string; readonly version: string; readonly base: string };
 	readonly effect: string;
 	readonly packages: ReadonlyArray<Package>;
 }
@@ -43,6 +45,11 @@ export const FAMILIES: ReadonlyArray<Family> = [
 		repo: "https://github.com/effectified/pi",
 		scope: "@effectified",
 		status: "alpha",
+		release: {
+			tag: "v0.1.0",
+			version: "0.1.0",
+			base: "https://github.com/effectified/pi/releases/download/v0.1.0",
+		},
 		effect: "~4.1.5",
 		packages: [
 			{
@@ -151,3 +158,8 @@ export const totals = {
 	packages: FAMILIES.reduce((sum, family) => sum + family.packages.length, 0),
 	upstream: new Set(FAMILIES.flatMap((family) => family.packages.flatMap((pkg) => pkg.wraps.map((w) => `${family.id}/${w}`)))).size,
 };
+
+/** The release URL of a package's tarball, as `npm pack` names it. */
+export function tarballUrl(family: Family, pkg: Package): string {
+	return `${family.release.base}/${family.scope.slice(1)}-${pkg.name}-${family.release.version}.tgz`;
+}
