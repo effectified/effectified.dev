@@ -1,0 +1,6 @@
+Purpose: a wide banner image for the "how it works" section of a dark developer-tool landing page, 3:1. It shows three stages of one transformation, left to right, and three cards sit directly under the three objects, so each object must be centred at one sixth, one half and five sixths of the frame width.
+Subject: one long low plinth of black stone runs across the whole frame in a dark gallery. On it, three objects, evenly spaced: on the left a rough, unfinished block of raw dark stone with chipped edges; in the middle the same block held inside a thin frame of black metal shaped like a pair of square brackets; on the right the block turned into a flawless smooth cube that glows pure white, still inside its bracket frame.
+Composition: straight-on, eye level with the plinth top, the plinth in the lower third, generous black space above. Each object lit by its own narrow beam of white light from above, the light getting brighter from left to right.
+Style: strictly monochrome: ink black, charcoal, zinc greys, pure white light. Museum product photography, very quiet, fine haze in the beams, subtle film grain, deep blacks.
+Text: no text.
+Avoid: letters, numbers, labels, logos, people, colour, reflections of windows, clutter.

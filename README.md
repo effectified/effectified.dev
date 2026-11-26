@@ -54,6 +54,19 @@ official or endorsed.
 
 Fonts are subsets of Inter and JetBrains Mono under the SIL Open Font License ([`brand/`](brand)).
 
+### Key visuals
+
+Four monochrome scenes light the page's rooms: `hero` (the bracket monoliths around a cube of light), `contract`
+(six wells of light), `pipeline` (raw stone, bracketed, lit) and `field` (every library, wrapped). Each room keeps
+its copy on ink through a gradient scrim, never in a box. No people, no text and no logo inside an image.
+
+- Masters: [`brand/key-visuals/*.jpg`](brand/key-visuals), 3840 px wide, generated with `gpt-image`
+  (gpt-image-2.6-sunburst, quality max, complexity high) from the briefs in
+  [`brand/key-visuals/prompts/`](brand/key-visuals/prompts): four drafts each, the best one rendered at 4K.
+- Web sizes: `uv run --with pillow python scripts/images.py` writes `public/lp/<name>-<width>.webp`
+  (828, 1440, 2560, 3840) from the masters; `src/components/Scene.astro` serves them as a `srcset`.
+- `pnpm og` renders `public/og.png` from `brand/og.html` over the hero master.
+
 ## License
 
 MIT

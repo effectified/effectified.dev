@@ -1,0 +1,6 @@
+Purpose: hero background of a dark, premium developer-tool landing page, 16:9. The left 55% of the frame must stay near-black, calm and empty, because a large white headline sits there. The subject lives in the right 40%.
+Subject: two monumental slabs of black basalt shaped like the square brackets of code, an opening bracket and a closing bracket, standing upright and facing each other like architecture. Between them, floating at mid-height, one perfect cube of pure white light. The cube is the only light source in the scene: it lights the inner faces of the two brackets and throws a long soft reflection across a polished black stone floor.
+Composition: wide shot, camera at chest height with a slight low angle, the bracket pair centred at about 72% of the frame width, the cube exactly between them. A vast dark space around them, a faint haze in the air catching the light.
+Style: strictly monochrome: ink black, charcoal, zinc greys and pure white light, no colour at all. Cinematic architectural photography, like a museum installation at night. Volumetric haze, subtle film grain, deep blacks, soft falloff, razor-sharp edges on the stone.
+Text: no text.
+Avoid: letters, numbers, logos, people, colour tints, lens flares, sci-fi panels, neon, clutter.

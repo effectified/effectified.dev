@@ -1,0 +1,30 @@
+---
+// One key visual of the page as a responsive, decorative image: the WebP sizes `scripts/images.py` writes to /lp.
+
+interface Props {
+	name: "hero" | "field" | "contract" | "pipeline";
+	sizes?: string;
+	eager?: boolean;
+	class?: string;
+}
+
+const WIDTHS = [828, 1440, 2560, 3840] as const;
+const RATIO = { hero: [16, 9], field: [16, 9], contract: [16, 9], pipeline: [3, 1] } as const;
+
+const { name, sizes = "100vw", eager = false, class: className } = Astro.props;
+const [w, h] = RATIO[name];
+const srcset = WIDTHS.map((width) => `/lp/${name}-${width}.webp ${width}w`).join(", ");
+---
+
+<img
+	class={className}
+	src={`/lp/${name}-1440.webp`}
+	srcset={srcset}
+	sizes={sizes}
+	width={w * 240}
+	height={h * 240}
+	alt=""
+	decoding="async"
+	loading={eager ? "eager" : "lazy"}
+	fetchpriority={eager ? "high" : "auto"}
+/>
