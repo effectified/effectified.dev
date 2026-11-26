@@ -23,7 +23,7 @@ pnpm og         # re-render public/og.png from brand/og.html (needs Chrome)
 ## Deploy
 
 ```sh
-CLOUDFLARE_ACCOUNT_ID=<account that holds the zone> pnpm deploy
+CLOUDFLARE_ACCOUNT_ID=<account that holds the zone> pnpm run deploy
 ```
 
 `cf deploy ./dist` serves `dist/` as an assets-only Worker, `effectified-site`, on the custom domain
