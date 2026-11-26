@@ -1,0 +1,70 @@
+---
+// The document shell of every page: metadata, fonts, the nav and the footer.
+import "../styles/site.css";
+import Mark from "../components/Mark.astro";
+
+interface Props {
+	title: string;
+	description: string;
+}
+
+const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL("/og.png", Astro.site).href;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		<meta name="theme-color" content="#09090b" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="preload" href="/fonts/InterDisplay-Bold.woff2" as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href="/fonts/JetBrainsMono-Medium.woff2" as="font" type="font/woff2" crossorigin />
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="effectified" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:image" content={ogImage} />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImage} />
+		<script is:inline>document.documentElement.classList.add("js");</script>
+	</head>
+	<body>
+		<header class="nav">
+			<div class="wrap">
+				<a class="lockup" href="/" aria-label="effectified home"><Mark /><span>effectified</span></a>
+				<nav class="nav-links" aria-label="Sections">
+					<a href="/#packages">Packages</a>
+					<a href="/#contract">Contract</a>
+					<a href="/#how">How it works</a>
+					<a href="/#join">Join</a>
+				</nav>
+				<a class="btn btn-ghost btn-small" href="https://github.com/effectified">GitHub</a>
+			</div>
+		</header>
+		<main>
+			<slot />
+		</main>
+		<footer class="footer">
+			<div class="wrap">
+				<a class="lockup" href="/" aria-label="effectified home"><Mark /><span>effectified</span></a>
+				<p>
+					Built on <a href="https://effect.website">Effect</a>. Not an official Effect project.
+					A sibling of <a href="https://effectscript.dev">EffectScript</a>. Made by
+					<a href="https://x.com/gunta85">@gunta85</a> and contributors.
+				</p>
+			</div>
+		</footer>
+	</body>
+</html>

@@ -1,0 +1,14 @@
+// effectified.dev on Cloudflare Workers: the built site as static assets, on a Workers Custom Domain.
+// Cloudflare creates the DNS record and the certificate for the custom domain on the first deploy.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "effectified-site",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "routes": [{ "pattern": "effectified.dev", "custom_domain": true }],
+  "workers_dev": false
+}

@@ -1,0 +1,321 @@
+---
+// The landing page: what effectified is, one library before and after, the contract, the pipeline, the catalog.
+import { Code } from "astro:components";
+import Base from "../layouts/Base.astro";
+import { monochrome } from "../code-theme";
+import { FAMILIES, KINDS, totals, type Kind } from "../data/catalog";
+
+const upstreamNames = [...new Set(FAMILIES.flatMap((family) => family.packages.flatMap((pkg) => pkg.wraps)))];
+
+const before = `import { builtinModels } from "@earendil-works/pi-ai/providers/all";
+
+const models = builtinModels();
+const model = models.getModel("anthropic", "claude-opus-4-7");
+if (!model) throw new Error("no such model");
+
+const controller = new AbortController();
+const timer = setTimeout(() => controller.abort(), 30_000);
+
+try {
+  const message = await models.complete(model, context, {
+    signal: controller.signal,
+  });
+  // A failed request resolves; you check for it.
+  if (message.stopReason === "error") throw new Error(message.errorMessage);
+  return message;
+} finally {
+  clearTimeout(timer);
+}`;
+
+const after = `import { anthropicProvider } from "@earendil-works/pi-ai/providers/anthropic";
+import { Effect } from "effect";
+import { complete, getModel, Models } from "@gunta/pi-ai-effect";
+
+const answer = Effect.gen(function* () {
+  const model = yield* getModel({
+    provider: "anthropic",
+    modelId: "claude-opus-4-7",
+  });
+  return yield* complete(model, context);
+}).pipe(
+  // Interrupting the fiber aborts the provider request.
+  Effect.timeout("30 seconds"),
+  Effect.provide(Models.layer([anthropicProvider()])),
+);`;
+
+const recipe = `// proposed format
+recipe("@earendil-works/pi-ai", {
+  service: "Models",
+  effects: ["complete", "stream"],
+  errors: { stopReason: "ModelRequestError" },
+  cancel: "fiber",
+})`;
+
+const contract = [
+	["Effect, Stream or Layer", "Every public function returns one. No promise, callback or any in a public signature."],
+	["Errors with names", "Failures are Schema.TaggedError classes, so catchTag sees every one. Library code never throws."],
+	["Interruption cancels", "Interrupting the fiber aborts the upstream call, and an upstream abort interrupts the fiber."],
+	["Upstream's types, not copies", "Types derive from upstream's own. What must stay hand-written is checked by a conformance test, so an upstream change fails the build and names what moved."],
+	["One Effect", "effect is a peer dependency with one range across the organization, so an app holds one copy."],
+	["Runs where Effect runs", "No node: or bun: import in a package core. Platform code sits behind its own subpath export."],
+] as const;
+
+const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
+---
+
+<Base
+	title="effectified: the libraries you use, Effect-native"
+	description="Effect-native packages for the libraries you already use: typed errors, services as Layers, interruption that cancels. Derived from upstream's own types, so they keep up."
+>
+	<section class="hero room">
+		<div class="hero-light" aria-hidden="true"></div>
+		<div class="hero-grid" aria-hidden="true"></div>
+		<div class="wrap">
+			<div>
+				<span class="label">// Effect-native wrappers · <span class="warn">▲ alpha</span></span>
+				<h1 style="margin-top: 26px"><span class="fade">npm,</span><span class="dim">effectified.</span></h1>
+				<p class="lede">
+					Effect-native packages for the libraries you already use. Typed errors, services as Layers, and
+					interruption that cancels the call. Types derived from upstream's own, so a new upstream release
+					fails the build instead of drifting.
+				</p>
+				<div class="hero-actions">
+					<a class="btn btn-solid" href="#packages">Browse the packages</a>
+					<a class="btn btn-ghost" href="#join">Effectify a library</a>
+				</div>
+				<div class="hero-facts">
+					<div><strong>{totals.packages}</strong><span>packages</span></div>
+					<div><strong>{totals.upstream}</strong><span>upstream packages wrapped</span></div>
+					<div><strong>{totals.families}</strong><span>{totals.families === 1 ? "family" : "families"} so far</span></div>
+				</div>
+			</div>
+			<div class="wrapper" data-state="closed" data-names={JSON.stringify(upstreamNames)} aria-hidden="true">
+				<div class="wrapper-stage">
+					<svg class="bracket bracket-l" viewBox="0 0 20 64" preserveAspectRatio="none"><path d="M0 0h20v7h-13v50h13v7H0z"></path></svg>
+					<span class="wrapper-name"><span>{upstreamNames[0]}</span></span>
+					<svg class="bracket bracket-r" viewBox="0 0 20 64" preserveAspectRatio="none"><path d="M20 0H0v7h13v50H0v7h20z"></path></svg>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="room" id="before-after">
+		<div class="wrap">
+			<div class="room-head reveal">
+				<span class="label">// Before and after</span>
+				<h2>Same library. <span class="dim">Now the types say what can go wrong.</span></h2>
+				<p class="lede">
+					The left side is pi-ai as it ships. The right side is the same call through its effectified
+					facade: what pi-ai does is what happens, but the failure, the timeout and the cancellation are in
+					the type, not in your head.
+				</p>
+			</div>
+			<div class="compare reveal">
+				<div class="pane">
+					<div class="pane-head"><span class="label">pi-ai</span><span class="label">promise</span></div>
+					<Code code={before} lang="ts" theme={monochrome} />
+					<div class="pane-foot">
+						<span class="sig quiet">Promise&lt;AssistantMessage&gt;: errors untyped, cancellation by hand</span>
+					</div>
+				</div>
+				<div class="pane">
+					<div class="pane-head"><span class="label">pi-ai-effect</span><span class="label">effect</span></div>
+					<Code code={after} lang="ts" theme={monochrome} />
+					<div class="pane-foot">
+						<span class="sig pass"><b>✓</b> AssistantMessage</span>
+						<span class="sig fail"><b>!</b> ModelNotFound | ModelRequestError | TimeoutError</span>
+						<span class="sig need"><b>◇</b> Models, provided</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="room" id="contract">
+		<div class="wrap">
+			<div class="room-head reveal">
+				<span class="label">// The contract</span>
+				<h2>Every package makes the same six promises.</h2>
+				<p class="lede">
+					Learn one effectified package and you know them all. The rules are checked in CI, not just
+					written down.
+				</p>
+			</div>
+			<div class="shelf reveal">
+				{
+					contract.map(([title, text], index) => (
+						<div>
+							<span class="num">{String(index + 1).padStart(2, "0")}</span>
+							<h3>{title}</h3>
+							<p>{text}</p>
+						</div>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section class="room" id="how">
+		<div class="wrap">
+			<div class="room-head reveal">
+				<span class="label">// How it works</span>
+				<h2>Decide once. <span class="dim">Then keep up for free.</span></h2>
+				<p class="lede">
+					A person decides how a library maps to Effect. After that the work is mechanical, and mechanical
+					work belongs to a machine. Today the first step is done by hand; the rest is what this
+					organization is for.
+				</p>
+			</div>
+			<div class="pipeline reveal">
+				<div class="station">
+					<span class="step">01 · RECIPE</span>
+					<h3>Map the library</h3>
+					<p>
+						Which calls become Effects, which failures become tagged errors, what becomes a service, who
+						owns cancellation.
+					</p>
+					<span class="chip pass">✓ Today · by hand</span>
+					<Code code={recipe} lang="ts" theme={monochrome} />
+				</div>
+				<div class="station">
+					<span class="step">02 · GENERATOR</span>
+					<h3>Write the facade</h3>
+					<p>
+						Reads upstream's type declarations and the recipe, and writes the facade, its errors and its
+						conformance test. The same input always writes the same output.
+					</p>
+					<span class="chip warn">▲ Roadmap</span>
+				</div>
+				<div class="station">
+					<span class="step">03 · UPSTREAM WATCH</span>
+					<h3>Follow every release</h3>
+					<p>
+						Watches upstream releases, regenerates, runs the tests and opens a pull request. A change the
+						recipe can't place asks a person instead of guessing.
+					</p>
+					<span class="chip warn">▲ Roadmap · today a sync script</span>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="room" id="packages">
+		<div class="wrap">
+			<div class="room-head reveal">
+				<span class="label">// Packages</span>
+				<h2>{totals.packages} packages, <span class="dim">{totals.families === 1 ? "one family" : `${totals.families} families`} so far.</span></h2>
+				<p class="lede">
+					A family is one upstream project made Effect-native: facades that add no behaviour, and plugins
+					built on them.
+				</p>
+			</div>
+			{
+				FAMILIES.map((family) => (
+					<div class="family reveal">
+						<div class="family-head">
+							<h3>{family.title}</h3>
+							<div class="meta">
+								<span>
+									upstream <a href={family.upstream.url}>{family.upstream.name}</a> @ {family.upstream.version}
+								</span>
+								<span>effect {family.effect}</span>
+								<span class="warn">▲ {family.status}</span>
+								<a href={family.repo}>source</a>
+							</div>
+						</div>
+						<table class="pkgs">
+							<thead>
+								<tr>
+									<th>Package</th>
+									<th class="kind-col">Kind</th>
+									<th class="wraps-col">Wraps</th>
+									<th>What it does</th>
+								</tr>
+							</thead>
+							<tbody>
+								{family.packages.map((pkg) => (
+									<tr>
+										<td class="name">
+											<span class="scope">{family.scope}/</span>
+											{pkg.name}
+										</td>
+										<td class="kind kind-col">{pkg.kind}</td>
+										<td class="wraps wraps-col">{pkg.wraps.length > 0 ? pkg.wraps.join(", ") : "–"}</td>
+										<td>{pkg.summary}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				))
+			}
+			<div class="kinds reveal">
+				{
+					kinds.map(([kind, text]) => (
+						<div>
+							<b>{kind}</b>
+							<p>{text}</p>
+						</div>
+					))
+				}
+			</div>
+			<p class="note"><span class="warn">▲</span><span>Not on npm yet. The Pi family moves to github.com/effectified and publishes as @effectified/*.</span></p>
+		</div>
+	</section>
+
+	<section class="room closing" id="join">
+		<div class="wrap">
+			<span class="label">// Join</span>
+			<h2 style="margin-top: 22px"><span class="fade">Effectify a library.</span><span class="dim" style="display:block">Then never port it again.</span></h2>
+			<p class="lede">
+				Name the library you want in Effect. Bring its recipe if you know how it should map. Every family
+				follows the same contract, so what you learn on one carries to the next.
+			</p>
+			<div class="hero-actions">
+				<a class="btn btn-solid" href="https://github.com/effectified/effectified.dev/issues/new?title=Effectify%3A%20">Request a library</a>
+				<a class="btn btn-ghost" href="https://github.com/effectified">github.com/effectified</a>
+			</div>
+			<div class="terminal">
+				<div class="terminal-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+				<pre><span class="p"># the Pi family, from source until it is on npm</span>
+<span class="p">$</span> git clone https://github.com/gunta/pi-effect
+<span class="p">$</span> cd pi-effect && npm install --ignore-scripts
+<span class="p">$</span> npm run build</pre>
+			</div>
+		</div>
+	</section>
+</Base>
+
+<script>
+	// The brackets open, the name changes to the next upstream package, the brackets close. Still with reduced motion.
+	const wrapper = document.querySelector<HTMLElement>(".wrapper");
+	const label = wrapper?.querySelector<HTMLElement>(".wrapper-name span");
+	const names: Array<string> = JSON.parse(wrapper?.dataset["names"] ?? "[]");
+	const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	if (wrapper && label && names.length > 1 && !still) {
+		let index = 0;
+		window.setInterval(() => {
+			wrapper.dataset["state"] = "open";
+			window.setTimeout(() => {
+				index = (index + 1) % names.length;
+				label.textContent = names[index] ?? "";
+				wrapper.dataset["state"] = "closed";
+			}, 520);
+		}, 2600);
+	}
+
+	// Entrances: each room rises in once. Content is visible without this script.
+	const reveals = document.querySelectorAll(".reveal");
+	const observer = new IntersectionObserver(
+		(entries) => {
+			for (const entry of entries) {
+				if (entry.isIntersecting) {
+					entry.target.classList.add("in");
+					observer.unobserve(entry.target);
+				}
+			}
+		},
+		{ rootMargin: "0px 0px -10% 0px" },
+	);
+	reveals.forEach((element) => observer.observe(element));
+</script>

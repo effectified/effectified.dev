@@ -1,0 +1,29 @@
+{
+  "name": "effectified.dev",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "effectified.dev: the landing page of the effectified organization",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "packageManager": "pnpm@12.21.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "og": "node scripts/og.ts",
+    "deploy": "astro build && wrangler deploy"
+  },
+  "dependencies": {
+    "astro": "7.4.13",
+    "shiki": "4.6.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "typescript": "6.0.3",
+    "wrangler": "4.168.0"
+  }
+}
