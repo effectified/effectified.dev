@@ -259,7 +259,7 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 								{family.packages.map((pkg) => (
 									<tr>
 										<td class="name">
-											{pkg.kind === "docs" ? (
+											{pkg.kind === "docs" || pkg.private === true ? (
 												<span>
 													<span class="scope">{family.scope}/</span>
 													{pkg.name}

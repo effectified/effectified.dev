@@ -10,6 +10,8 @@ export interface Package {
 	/** The upstream packages it wraps or builds on, with the pinned version. */
 	readonly wraps: ReadonlyArray<string>;
 	readonly summary: string;
+	/** Not in the release: private like the upstream package it wraps, used from a checkout. */
+	readonly private?: true;
 }
 
 /** One upstream project and the packages that make it Effect-native. */
@@ -46,9 +48,9 @@ export const FAMILIES: ReadonlyArray<Family> = [
 		scope: "@effectified",
 		status: "alpha",
 		release: {
-			tag: "v0.1.0",
-			version: "0.1.0",
-			base: "https://github.com/effectified/pi/releases/download/v0.1.0",
+			tag: "v0.2.0",
+			version: "0.2.0",
+			base: "https://github.com/effectified/pi/releases/download/v0.2.0",
 		},
 		effect: "~4.1.5",
 		packages: [
@@ -74,7 +76,56 @@ export const FAMILIES: ReadonlyArray<Family> = [
 				name: "pi-telemetry",
 				kind: "facade",
 				wraps: ["pi-telemetry"],
-				summary: "Pi spans, metrics and events as Effect spans, metrics and logs.",
+				summary: "Pi spans, metrics and events as Effect spans, metrics and logs; typed telemetry schemas.",
+			},
+			{
+				name: "pi-agent",
+				kind: "facade",
+				wraps: ["pi-agent-core"],
+				summary: "Pi's short-lived agent loop: prompts as Effects, events as Streams, tools and hooks as Effects.",
+			},
+			{
+				name: "pi-coding-agent",
+				kind: "facade",
+				wraps: ["pi-coding-agent"],
+				summary: "Pi extensions written in Effect, sessions, built-in and MCP tools, print, RPC and interactive modes.",
+			},
+			{
+				name: "pi-mcp",
+				kind: "facade",
+				wraps: ["pi-mcp"],
+				summary: "MCP clients and transports as scoped resources, notifications as Streams, OAuth sign-in.",
+			},
+			{
+				name: "pi-env",
+				kind: "facade",
+				wraps: ["pi-env"],
+				summary: "Local and remote environments, processes, terminals and SSH as scoped resources.",
+			},
+			{
+				name: "pi-tui",
+				kind: "facade",
+				wraps: ["pi-tui"],
+				summary: "The terminal UI as a scoped service, keys and callbacks as Streams, keybindings kept configurable.",
+			},
+			{
+				name: "pi-codemode",
+				kind: "facade",
+				wraps: ["pi-codemode"],
+				summary: "Code mode over Effect tools: worker, inline and remote sandboxes, runs as Streams.",
+			},
+			{
+				name: "pi-chord",
+				kind: "facade",
+				wraps: ["chord"],
+				summary: "Chord's context from the calling fiber, its store, hosts, facets, links and clients.",
+			},
+			{
+				name: "pi-evals",
+				kind: "facade",
+				wraps: ["pi-evals"],
+				summary: "Evaluations whose runs, scorers and Docker observations are Effects and Streams.",
+				private: true,
 			},
 			{
 				name: "pi-approvals",
