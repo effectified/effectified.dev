@@ -29,7 +29,7 @@ try {
 
 const after = `import { anthropicProvider } from "@earendil-works/pi-ai/providers/anthropic";
 import { Effect } from "effect";
-import { complete, getModel, Models } from "@gunta/pi-ai-effect";
+import { complete, getModel, Models } from "@effectified/pi-ai";
 
 const answer = Effect.gen(function* () {
   const model = yield* getModel({
@@ -112,14 +112,14 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 			</div>
 			<div class="compare reveal">
 				<div class="pane">
-					<div class="pane-head"><span class="label">pi-ai</span><span class="label">promise</span></div>
+					<div class="pane-head"><span class="label">@earendil-works/pi-ai</span><span class="label">promise</span></div>
 					<Code code={before} lang="ts" theme={monochrome} />
 					<div class="pane-foot">
 						<span class="sig quiet">Promise&lt;AssistantMessage&gt;: errors untyped, cancellation by hand</span>
 					</div>
 				</div>
 				<div class="pane">
-					<div class="pane-head"><span class="label">pi-ai-effect</span><span class="label">effect</span></div>
+					<div class="pane-head"><span class="label">@effectified/pi-ai</span><span class="label">effect</span></div>
 					<Code code={after} lang="ts" theme={monochrome} />
 					<div class="pane-foot">
 						<span class="sig pass"><b>✓</b> AssistantMessage</span>
@@ -259,7 +259,7 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 					))
 				}
 			</div>
-			<p class="note"><span class="warn">▲</span><span>Not on npm yet. The Pi family moves to github.com/effectified and publishes as @effectified/*.</span></p>
+			<p class="note"><span class="warn">▲</span><span>Not on npm yet: the first alpha of @effectified/pi-* is on its way.</span></p>
 		</div>
 	</section>
 
@@ -278,8 +278,8 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 			<div class="terminal">
 				<div class="terminal-bar" aria-hidden="true"><i></i><i></i><i></i></div>
 				<pre><span class="p"># the Pi family, from source until it is on npm</span>
-<span class="p">$</span> git clone https://github.com/gunta/pi-effect
-<span class="p">$</span> cd pi-effect && npm install --ignore-scripts
+<span class="p">$</span> git clone https://github.com/effectified/pi
+<span class="p">$</span> cd pi && npm install --ignore-scripts
 <span class="p">$</span> npm run build</pre>
 			</div>
 		</div>

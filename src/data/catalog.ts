@@ -18,7 +18,7 @@ export interface Family {
 	readonly title: string;
 	readonly upstream: { readonly name: string; readonly url: string; readonly version: string };
 	readonly repo: string;
-	/** The npm scope the packages carry today; they move to `@effectified/*` with the family's repo. */
+	/** The npm scope of the family's packages. */
 	readonly scope: string;
 	readonly status: "alpha";
 	readonly effect: string;
@@ -40,103 +40,103 @@ export const FAMILIES: ReadonlyArray<Family> = [
 		id: "pi",
 		title: "Pi",
 		upstream: { name: "earendil-works/pi", url: "https://github.com/earendil-works/pi", version: "1.6.1" },
-		repo: "https://github.com/gunta/pi-effect",
-		scope: "@gunta",
+		repo: "https://github.com/effectified/pi",
+		scope: "@effectified",
 		status: "alpha",
 		effect: "~4.1.5",
 		packages: [
 			{
-				name: "pi-ai-effect",
+				name: "pi-ai",
 				kind: "facade",
 				wraps: ["pi-ai"],
 				summary: "Models as a service, requests as Stream and Effect, bridges to effect/ai both ways.",
 			},
 			{
-				name: "pi-durable-effect",
+				name: "pi-durable",
 				kind: "facade",
 				wraps: ["pi-durable", "pi-ai", "chord"],
 				summary: "The durable agent harness as Layers, Effects and Streams.",
 			},
 			{
-				name: "pi-schema-effect",
+				name: "pi-schema",
 				kind: "facade",
 				wraps: ["pi-schema"],
 				summary: "Effect Schema to and from Pi tool parameters, with typed decode errors.",
 			},
 			{
-				name: "pi-telemetry-effect",
+				name: "pi-telemetry",
 				kind: "facade",
 				wraps: ["pi-telemetry"],
 				summary: "Pi spans, metrics and events as Effect spans, metrics and logs.",
 			},
 			{
-				name: "pi-approvals-effect",
+				name: "pi-approvals",
 				kind: "plugin",
 				wraps: ["pi-durable"],
 				summary: "Human approval of tool calls: a parking gate with typed requests and decisions.",
 			},
 			{
-				name: "pi-budget-effect",
+				name: "pi-budget",
 				kind: "plugin",
 				wraps: ["pi-ai", "pi-durable"],
 				summary: "Budget leases: reserve before each request, settle after, stop when fenced.",
 			},
 			{
-				name: "pi-guard-effect",
+				name: "pi-guard",
 				kind: "plugin",
 				wraps: ["pi-durable"],
 				summary: "Tool allow-lists, forbidden verbs and argument rules, failing closed.",
 			},
 			{
-				name: "pi-recorder-effect",
+				name: "pi-recorder",
 				kind: "plugin",
 				wraps: ["pi-ai", "pi-durable"],
 				summary: "Every message, model call and tool call to a sink, at least once, with deterministic ids.",
 			},
 			{
-				name: "pi-review-effect",
+				name: "pi-review",
 				kind: "plugin",
 				wraps: ["pi-ai", "pi-durable"],
 				summary: "A second model of another family and a citation check before an answer stands.",
 			},
 			{
-				name: "pi-router-effect",
+				name: "pi-router",
 				kind: "plugin",
 				wraps: ["pi-ai"],
 				summary: "Model routes: fallback, a limiter with backoff, prices, region filters.",
 			},
 			{
-				name: "pi-search-effect",
+				name: "pi-search",
 				kind: "plugin",
 				wraps: ["pi-durable"],
 				summary: "Search and fetch tools behind a provider port, with an Exa adapter.",
 			},
 			{
-				name: "pi-subagent-effect",
+				name: "pi-subagent",
 				kind: "plugin",
 				wraps: ["pi-durable"],
 				summary: "Foreground and background child agents with typed results.",
 			},
 			{
-				name: "pi-swarm-effect",
+				name: "pi-swarm",
 				kind: "plugin",
 				wraps: ["pi-durable"],
 				summary: "Prime once, fork per job under a cap, typed fan-in and cleanup.",
 			},
 			{
-				name: "pi-durable-rivet-effect",
+				name: "pi-durable-rivet",
 				kind: "host",
 				wraps: ["pi-durable", "pi-ai", "chord"],
 				summary: "A durable harness inside a Rivet actor: actor SQLite, schedules and forks.",
 			},
 			{
-				name: "pi-thread-effect",
+				name: "pi-thread",
 				kind: "composition",
 				wraps: ["pi-ai", "pi-durable"],
 				summary: "An agent thread: guarded, budgeted, recorded and reviewed, with subagents and swarms.",
 			},
 			{
-				name: "pi-docs-effect",
+				name: "pi-docs",
 				kind: "docs",
 				wraps: [],
 				summary: "The family's docs as pages for people and as skills for agents.",
