@@ -1,11 +1,13 @@
 ---
 // The landing page: what effectified is, one library before and after, the contract, the pipeline, the catalog.
 import { Code } from "astro:components";
+import { getCollection } from "astro:content";
 import Install from "../components/Install.astro";
 import Scene from "../components/Scene.astro";
 import Base from "../layouts/Base.astro";
 import { effectifiedDark } from "../code-theme";
-import { ENGINE_TARGETS, FAMILIES, KINDS, tarballUrl, totals, type Kind } from "../data/catalog";
+import { FAMILIES, KINDS, totals, type Kind } from "../data/catalog";
+import { type Facade, piLatestUrl } from "../data/packages";
 
 // The Pi family and its composition, the one package a product installs first.
 const [pi] = FAMILIES;
@@ -77,8 +79,12 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 
 const weekly = (downloads: number) =>
 	downloads >= 1_000_000 ? `${Math.round(downloads / 1_000_000)}M` : `${Math.round(downloads / 1_000)}k`;
-const uiTargets = ENGINE_TARGETS.filter((target) => target.kind === "ui").length;
-const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0);
+// The facades of effectified/packages, from the docs the engine generates into each: most downloaded first.
+const facades = (await getCollection("facades"))
+	.map((entry): Facade => entry.data)
+	.sort((a, b) => (b.weekly ?? 0) - (a.weekly ?? 0) || a.slug.localeCompare(b.slug));
+const uiTargets = facades.filter((facade) => facade.kind === "ui").length;
+const engineTests = facades.reduce((sum, facade) => sum + facade.tests, 0);
 ---
 
 <Base
@@ -108,8 +114,8 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 				</span>
 			</p>
 			<div class="hero-facts">
-				<div><strong>{totals.packages}</strong><span>packages</span></div>
-				<div><strong>{totals.upstream}</strong><span>upstream packages wrapped</span></div>
+				<div><strong>{totals.packages + facades.length}</strong><span>packages</span></div>
+				<div><strong>{totals.upstream + facades.length}</strong><span>upstream packages wrapped</span></div>
 				<div><strong>{totals.families}</strong><span>{totals.families === 1 ? "family" : "families"} so far</span></div>
 			</div>
 		</div>
@@ -238,12 +244,11 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 							<h3>{family.title}</h3>
 							<div class="meta">
 								<span>
-									upstream <a href={family.upstream.url}>{family.upstream.name}</a> @ {family.upstream.version}
+									upstream <a href={family.upstream.url}>{family.upstream.name}</a>
 								</span>
-								<span>effect {family.effect}</span>
 								<span class="warn">▲ {family.status}</span>
 								<a href={family.repo}>source</a>
-								<a href={`${family.repo}/releases/tag/${family.release.tag}`}>release {family.release.tag}</a>
+								<a href={`${family.repo}/releases`}>releases</a>
 							</div>
 						</div>
 						<table class="pkgs">
@@ -265,7 +270,7 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 													{pkg.name}
 												</span>
 											) : (
-												<a href={tarballUrl(family, pkg)} title="Tarball of this release">
+												<a href={piLatestUrl(pkg.name)} title="Tarball of the newest release">
 													<span class="scope">{family.scope}/</span>
 													{pkg.name}
 												</a>
@@ -296,11 +301,11 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 					<span class="label">// Install from GitHub</span>
 					<p>
 						Released on GitHub, not npm. One URL installs a package with every effectified package it needs;
-						Pi and <code>effect</code> come from npm.{" "}
-						<a href={`${pi.repo}/releases/tag/${pi.release.tag}`}>{pi.release.tag} release notes</a>
+						Pi and <code>effect</code> come from npm. The URL always installs the newest release.{" "}
+						<a href={`${pi.repo}/releases`}>Release notes</a>
 					</p>
 				</div>
-				<Install family={pi} pkg={thread} />
+				<Install url={piLatestUrl(thread.name)} urlDependencies />
 			</div>
 		</div>
 	</section>
@@ -309,7 +314,7 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 		<div class="wrap">
 			<div class="room-head reveal">
 				<span class="label">// From the engine</span>
-				<h2>{ENGINE_TARGETS.length} popular libraries, <span class="spectrum">effectified.</span></h2>
+				<h2>{facades.length} popular libraries, <span class="spectrum">effectified.</span></h2>
 				<p class="lede">
 					None had an Effect wrapper on npm, in Effect itself or in Distilled. The engine generated each facade
 					from the library's own types, and {engineTests} behaviour tests run it against the real thing. {uiTargets} of
@@ -335,24 +340,25 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 							<th>Facade</th>
 							<th class="kind-col">Kind</th>
 							<th class="kind-col">Weekly</th>
-							<th class="wraps-col">Tested against</th>
-							<th>What it exercises</th>
+							<th class="kind-col">Tests</th>
+							<th>What it shows</th>
 						</tr>
 					</thead>
 					<tbody>
-						{ENGINE_TARGETS.map((target) => (
+						{facades.map((facade) => (
 							<tr>
 								<td class="name">
-									<a href={`https://github.com/effectified/packages/releases/tag/${encodeURIComponent(target.release)}`}>
+									<a href={`/${facade.slug}`}>
 										<span class="scope">@effectified/</span>
-										{target.facade.replace("@effectified/", "")}
+										{facade.slug}
 									</a>
 								</td>
-								<td class="kind kind-col">{target.kind === "ui" ? "Effect UI" : "runtime"}</td>
-								<td class="kind kind-col">{weekly(target.weekly)}</td>
-								<td class="wraps wraps-col">{target.against} · {target.tests} tests</td>
+								<td class="kind kind-col">{facade.kind === "ui" ? "Effect UI" : "runtime"}</td>
+								<td class="kind kind-col">{facade.weekly === undefined ? "–" : weekly(facade.weekly)}</td>
+								<td class="kind kind-col">{facade.tests}</td>
 								<td>
-									<a href={`https://github.com/effectified/packages/tree/main/targets/${target.directory}`}>{target.library} {target.version}</a>: {target.exercises}.
+									<a href={`/${facade.slug}`}>{facade.upstream.package}</a>
+									{facade.tagline === undefined ? "" : `: ${facade.tagline}.`}
 								</td>
 							</tr>
 						))}
@@ -378,7 +384,7 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 				<a class="btn btn-ghost" href="https://github.com/effectified">github.com/effectified</a>
 			</div>
 			<div class="closing-install">
-				<Install family={pi} pkg={thread} />
+				<Install url={piLatestUrl(thread.name)} urlDependencies />
 			</div>
 		</div>
 	</section>

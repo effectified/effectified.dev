@@ -1,19 +1,22 @@
 ---
-// The install command of one package from its GitHub release, for npm, pnpm and Bun, with a copy button.
-// Every manager's command is in the page; without JavaScript the npm one shows and can be selected by hand.
-import { tarballUrl, type Family, type Package } from "../data/catalog";
+// The install command of one package, for npm, pnpm and Bun, with a copy button. Every manager's command is in the
+// page; without JavaScript the npm one shows and can be selected by hand.
 
 interface Props {
-	family: Family;
-	pkg: Package;
+	/** The tarball: `https://effectified.dev/<name>.tgz`, which always installs the newest release. */
+	url: string;
+	/** Further packages to install with it (Effect UI's snapshot build, say). */
+	extra?: string | undefined;
+	/** Whether the package's own dependencies are tarball URLs, which pnpm installs only when told to. */
+	urlDependencies?: boolean;
 }
 
-const { family, pkg } = Astro.props;
-const url = tarballUrl(family, pkg);
+const { url, extra, urlDependencies = false } = Astro.props;
+const rest = `${url} effect${extra === undefined ? "" : ` ${extra}`}`;
 const managers = [
-	{ id: "npm", command: `npm install --allow-remote=all ${url} effect` },
-	{ id: "pnpm", command: `pnpm add --config.block-exotic-subdeps=false ${url} effect` },
-	{ id: "bun", command: `bun add ${url} effect` },
+	{ id: "npm", command: `npm install --allow-remote=all ${rest}` },
+	{ id: "pnpm", command: `pnpm add ${urlDependencies ? "--config.block-exotic-subdeps=false " : ""}${rest}` },
+	{ id: "bun", command: `bun add ${rest}` },
 ] as const;
 ---
 

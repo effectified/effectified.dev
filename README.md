@@ -30,7 +30,7 @@ CLOUDFLARE_ACCOUNT_ID=<account that holds the zone> pnpm run deploy
 `effectified.dev` (`cloudflare.config.ts`). Cloudflare created the DNS record and the certificate on the first deploy.
 `cf` uses the login of `cf auth`; the account ID is needed when that login sees more than one account.
 
-The `site` workflow deploys every push to `main` once the repository has two secrets:
+The `site` workflow deploys every push to `main`, and every 30 minutes checks whether effectified/packages or effectified/pi has a new commit or release (against `/build.json`, what the live site was built from) and deploys if so, once the repository has two secrets:
 
 - `CLOUDFLARE_API_TOKEN`: a token with the "Edit Cloudflare Workers" template, scoped to the account and the
   `effectified.dev` zone.
@@ -38,8 +38,14 @@ The `site` workflow deploys every push to `main` once the repository has two sec
 
 ## Catalog
 
-Every family and package the page lists is in [`src/data/catalog.ts`](src/data/catalog.ts). The counts on the page
-are computed from it at build time; never write a number into the page by hand.
+The Pi family and its packages are in [`src/data/catalog.ts`](src/data/catalog.ts). The facades of
+[effectified/packages](https://github.com/effectified/packages) are a content collection
+([`src/content.config.ts`](src/content.config.ts)): each one's `docs.json` and `SKILL.md`, which the engine generates
+into it, read from a checkout of that repository (`EFFECTIFIED_PACKAGES`, a sibling `../packages`, or a shallow clone).
+Each facade gets a page (`/<name>`) with its examples, its frontend demo, its API and its skill (`/<name>/SKILL.md`).
+The build also writes `_redirects`: `/<name>.tgz` is the tarball of each package's newest release, so the page never
+names a version. The counts on the page are computed at build time; never write a number or a version into the page
+by hand.
 
 ## Brand
 

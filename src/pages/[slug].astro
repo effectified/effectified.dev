@@ -1,0 +1,222 @@
+---
+// One facade's page, generated from the docs.json and SKILL.md the engine writes into it in effectified/packages:
+// what it is, how to install its newest release, its examples (a frontend facade's beside the live demo that runs
+// them), its API, and the skill an agent follows to use it. Nothing here is written per facade.
+import { Code } from "astro:components";
+import { getCollection } from "astro:content";
+import Install from "../components/Install.astro";
+import Base from "../layouts/Base.astro";
+import { effectifiedDark } from "../code-theme";
+import type { Facade } from "../data/packages";
+
+interface Props {
+	facade: Facade;
+}
+
+export async function getStaticPaths() {
+	const facades = await getCollection("facades");
+	return facades.map((entry) => ({ params: { slug: entry.id }, props: { facade: entry.data as Facade } }));
+}
+
+const { facade } = Astro.props;
+const { api } = facade;
+const ui = facade.kind === "ui";
+const releases = facade.source.replace(/\/tree\/main\/.*$/, `/releases?q=${encodeURIComponent(facade.slug)}`);
+const list = (names: ReadonlyArray<string>) => (names.length === 0 ? "–" : names.join(", "));
+const effects = api.handles.reduce((sum, handle) => sum + handle.effects.length, 0);
+const streams = api.handles.reduce((sum, handle) => sum + handle.streams.length + handle.events.length, 0);
+const facts = ui
+	? [
+			...(api.elements.length === 0 ? [] : [[String(api.elements.length), "elements bound"]]),
+			...(api.mounts.length === 0 ? [] : [[String(api.mounts.length), api.mounts.length === 1 ? "mount" : "mounts"]]),
+			[String(facade.tests), facade.tests === 1 ? "test in Chrome" : "tests in Chrome"],
+		]
+	: [
+			[String(effects), "calls as Effects"],
+			...(streams === 0 ? [] : [[String(streams), "Streams"]]),
+			[String(api.errors.length), api.errors.length === 1 ? "tagged error" : "tagged errors"],
+			[String(facade.tests), facade.tests === 1 ? "test, real library" : "tests, real library"],
+		];
+---
+
+<Base title={`${facade.name}: ${facade.upstream.package} ${ui ? "for Effect UI" : "in Effect"}`} description={facade.tagline === undefined ? facade.description : `${facade.upstream.package} ${ui ? "for Effect UI" : "in Effect"}: ${facade.tagline}.`}>
+	<section class="room facade-head">
+		<div class="wrap">
+			<span class="label"
+				><a href="/#engine">// effectified/packages</a> · {ui ? "Effect UI" : "runtime"} · <span class="warn">▲ alpha</span></span
+			>
+			<h1><span class="scope">@effectified/</span>{facade.slug}</h1>
+			<p class="lede">
+				<a href={facade.upstream.npm}>{facade.upstream.package}</a>
+				{ui ? <> for <a href="https://ui.effect.website">Effect UI</a></> : <> in <a href="https://effect.website">Effect</a></>}{facade.tagline === undefined ? "." : `: ${facade.tagline}.`}{" "}
+				Generated from its own types by the <a href="https://github.com/effectified/engine">engine</a>, and tested against the real library.
+			</p>
+			<dl class="facts">
+				{facts.map(([value, label]) => (
+					<div>
+						<dt>{value}</dt>
+						<dd>{label}</dd>
+					</div>
+				))}
+			</dl>
+			<div class="facade-install">
+				<Install url={facade.install.latest} extra={facade.install.effectUi} />
+				<p class="note">
+					<span class="quiet">
+						Always the newest release. To pin one, install its tarball from the <a href={releases}>releases</a>.
+						{ui ? " Effect UI is in public preview: its snapshot build installs with it." : ""}
+					</span>
+				</p>
+			</div>
+			<nav class="facade-links" aria-label="On this page">
+				{facade.examples.length > 0 && <a href="#examples">Examples</a>}
+				<a href="#api">API</a>
+				<a href="#skill">Agent skill</a>
+				<a href={facade.source}>Source</a>
+			</nav>
+		</div>
+	</section>
+
+	{
+		facade.examples.length > 0 && (
+			<section class="room" id="examples">
+				<div class="wrap">
+					<div class="room-head">
+						<span class="label">// Examples</span>
+						<h2>
+							Code from its tests. <span class="dim">{ui ? "Running, beside it." : "Every one passes in CI."}</span>
+						</h2>
+					</div>
+					{facade.examples.map((example) => (
+						<article class={`example${example.demo === undefined ? "" : " with-demo"}`}>
+							<header>
+								<h3>{example.title}</h3>
+								<a class="source" href={`${facade.source}/package/${example.source}`}>{example.source}</a>
+							</header>
+							<div class="example-body">
+								<div class="example-code">
+									<Code code={example.code} lang="ts" theme={effectifiedDark} />
+								</div>
+								{example.demo !== undefined && (
+									<figure class="demo">
+										<iframe src={`/demos/${facade.slug}/${example.demo}.html`} title={`${example.title}: live demo`} loading="lazy" />
+										<figcaption>Live: the fixture CI drives in Chrome, built from the newest release.</figcaption>
+									</figure>
+								)}
+							</div>
+						</article>
+					))}
+				</div>
+			</section>
+		)
+	}
+
+	<section class="room" id="api">
+		<div class="wrap">
+			<div class="room-head">
+				<span class="label">// API</span>
+				<h2>What it offers. <span class="dim">Read from upstream's types.</span></h2>
+				{api.exports.length > 0 && <p class="lede">Exports: <code>{api.exports.join(", ")}</code>{api.services.length > 0 && <>. Services: <code>{api.services.map((service) => service.name).join(", ")}</code>, each with a <code>layer</code></>}.</p>}
+			</div>
+			{
+				api.handles.length > 0 && (
+					<div class="family api">
+						<table class="pkgs">
+							<thead>
+								<tr>
+									<th>Handle</th>
+									<th>Effects</th>
+									<th>Streams and events</th>
+									<th class="kind-col">Released by</th>
+								</tr>
+							</thead>
+							<tbody>
+								{api.handles.map((handle) => (
+									<tr>
+										<td class="name">{handle.name}</td>
+										<td class="wraps">{list(handle.effects)}</td>
+										<td class="wraps">{list([...handle.streams, ...handle.events.map((event) => `events.${handle.name}.${event}`)])}</td>
+										<td class="wraps kind-col">{handle.release ?? "–"}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				)
+			}
+			{
+				api.elements.length > 0 && (
+					<div class="family api">
+						<table class="pkgs">
+							<thead>
+								<tr>
+									<th>Element</th>
+									<th>Binding</th>
+									<th class="wraps-col">Properties</th>
+									<th>Events</th>
+								</tr>
+							</thead>
+							<tbody>
+								{api.elements.map((element) => (
+									<tr>
+										<td class="name">&lt;{element.tag}&gt;</td>
+										<td class="name">{element.name}{element.changes.length > 0 && <span class="scope">, {element.name}Changes</span>}</td>
+										<td class="wraps wraps-col">{list(element.properties)}</td>
+										<td class="wraps">{list(element.events)}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				)
+			}
+			{api.mounts.length > 0 && <p class="note">Mounts: <code>{api.mounts.map((mount) => `${mount}Mount`).join(", ")}</code>: one instance per element, updated from the view's args, released with the element.</p>}
+			{
+				api.errors.length > 0 && (
+					<div class="family api">
+						<table class="pkgs">
+							<thead>
+								<tr>
+									<th>Error</th>
+									<th>When</th>
+								</tr>
+							</thead>
+							<tbody>
+								{api.errors.map((error, index) => (
+									<tr>
+										<td class="name">{error.tag}</td>
+										<td class="wraps">
+											{[
+												error.instanceOf === undefined ? (index === api.errors.length - 1 ? "any other failure" : "") : `upstream's ${error.instanceOf}`,
+												error.codes.length === 0 ? "" : `codes ${error.codes.join(", ")}`,
+											]
+												.filter((part) => part !== "")
+												.join("; ")}
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				)
+			}
+		</div>
+	</section>
+
+	<section class="room" id="skill">
+		<div class="wrap">
+			<div class="room-head">
+				<span class="label">// Agent skill</span>
+				<h2>For your coding agent. <span class="dim">Ships in the package.</span></h2>
+				<p class="lede">
+					<code>SKILL.md</code> teaches an agent this facade: its rules, its API and these examples. It is in every
+					release (<code>node_modules/{facade.name}/SKILL.md</code>); copy it into your agent's skills, or{" "}
+					<a href={`/${facade.slug}/SKILL.md`}>download it</a>.
+				</p>
+			</div>
+			<div class="skill">
+				<Code code={facade.skill} lang="md" theme={effectifiedDark} />
+			</div>
+		</div>
+	</section>
+</Base>
