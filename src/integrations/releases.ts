@@ -1,7 +1,6 @@
 // What a site build adds beside its pages, from the releases it lists: `_redirects`, which sends `/<name>.tgz` to the
 // tarball of each package's newest release (so the site and every README install "the latest" by one stable URL),
-// the live demos of the frontend facades, unpacked from their releases under `/demos/<slug>/`, and `build.json`,
-// what the build was made from.
+// and the live demos of the frontend facades, unpacked from their releases under `/demos/<slug>/`.
 
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
@@ -31,8 +30,6 @@ export function releases(): AstroIntegration {
 								.map((pkg) => `/${pkg.name}.tgz ${tarballUrl({ ...pi, release }, pkg)} 302`)),
 				];
 				writeFileSync(join(out, "_redirects"), `${lines.join("\n")}\n`);
-				// What this build shows, for the deploy workflow to compare with what is newest.
-				writeFileSync(join(out, "build.json"), `${JSON.stringify({ sources: process.env["EFFECTIFIED_SOURCES"] ?? "local" })}\n`);
 				logger.info(`_redirects: ${lines.length} packages to their newest release`);
 				for (const facade of facades) {
 					if (facade.demo === undefined) continue;

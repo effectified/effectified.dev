@@ -30,10 +30,16 @@ CLOUDFLARE_ACCOUNT_ID=<account that holds the zone> pnpm run deploy
 `effectified.dev` (`cloudflare.config.ts`). Cloudflare created the DNS record and the certificate on the first deploy.
 `cf` uses the login of `cf auth`; the account ID is needed when that login sees more than one account.
 
-The `site` workflow deploys every push to `main`, and every 30 minutes checks whether effectified/packages or effectified/pi has a new commit or release (against `/build.json`, what the live site was built from) and deploys if so, once the repository has two secrets:
+The `site` workflow deploys when what the site shows changes; nothing polls:
 
-- `CLOUDFLARE_API_TOKEN`: a token with the "Edit Cloudflare Workers" template, scoped to the account and the
-  `effectified.dev` zone.
+- a push to `main` here;
+- effectified/packages calls it (`workflow_call`) from its release workflow, after CI passes on its `main`;
+- effectified/pi's release script (`effect/scripts/release.ts`) starts it (`gh workflow run`) after a release.
+
+It needs two secrets, in this repository and in effectified/packages (a called workflow gets the caller's secrets):
+
+- `CLOUDFLARE_API_TOKEN`: an account-owned token that can edit Workers scripts and read account settings, plus edit
+  Workers routes and read the `effectified.dev` zone (`cf accounts tokens create`).
 - `CLOUDFLARE_ACCOUNT_ID`: the account that holds the zone.
 
 ## Catalog
