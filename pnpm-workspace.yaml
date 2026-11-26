@@ -1,0 +1,4 @@
+# Install scripts stay off: esbuild ships its binary as an optional dependency, and workerd is only for local simulation.
+allowBuilds:
+  esbuild: false
+  workerd: false

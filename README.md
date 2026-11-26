@@ -22,8 +22,13 @@ pnpm og         # re-render public/og.png from brand/og.html (needs Chrome)
 
 ## Deploy
 
-`wrangler deploy` serves `dist/` as static assets of the Worker `effectified-site` on the custom domain
-`effectified.dev` (`wrangler.jsonc`). Cloudflare creates the DNS record and the certificate on the first deploy.
+```sh
+CLOUDFLARE_ACCOUNT_ID=<account that holds the zone> pnpm deploy
+```
+
+`cf deploy ./dist` serves `dist/` as an assets-only Worker, `effectified-site`, on the custom domain
+`effectified.dev` (`cloudflare.config.ts`). Cloudflare created the DNS record and the certificate on the first deploy.
+`cf` uses the login of `cf auth`; the account ID is needed when that login sees more than one account.
 
 The `site` workflow deploys every push to `main` once the repository has two secrets:
 

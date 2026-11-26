@@ -31,4 +31,4 @@ jobs:
       - run: pnpm build
       # The deploy needs the two Cloudflare secrets; without them the workflow stops after the build.
       - if: github.event_name == 'push' && env.CLOUDFLARE_API_TOKEN != ''
-        run: pnpm exec wrangler deploy
+        run: pnpm exec cf deploy ./dist
