@@ -75,7 +75,9 @@ const contract = [
 
 const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 
-const weekly = (downloads: number) => `${Math.round(downloads / 1_000_000)}M`;
+const weekly = (downloads: number) =>
+	downloads >= 1_000_000 ? `${Math.round(downloads / 1_000_000)}M` : `${Math.round(downloads / 1_000)}k`;
+const uiTargets = ENGINE_TARGETS.filter((target) => target.kind === "ui").length;
 const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0);
 ---
 
@@ -307,10 +309,12 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 		<div class="wrap">
 			<div class="room-head reveal">
 				<span class="label">// From the engine</span>
-				<h2>{ENGINE_TARGETS.length} famous libraries, <span class="spectrum">effectified.</span></h2>
+				<h2>{ENGINE_TARGETS.length} popular libraries, <span class="spectrum">effectified.</span></h2>
 				<p class="lede">
 					None had an Effect wrapper on npm, in Effect itself or in Distilled. The engine generated each facade
-					from the library's own types, and {engineTests} behaviour tests run it against the real thing.
+					from the library's own types, and {engineTests} behaviour tests run it against the real thing. {uiTargets} of
+					them are frontend libraries, made native to <a href="https://ui.effect.website">Effect UI</a>: web components
+					bound from their manifests, and charts, editors, maps and terminals as mounts that live with their element.
 				</p>
 			</div>
 			<div class="family reveal">
@@ -318,7 +322,7 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 					<h3>effectified/engine</h3>
 					<div class="meta">
 						<span>TypeScript 7 · ast-grep · Effect 4</span>
-						<span class="warn">▲ generated and tested · not yet released</span>
+						<span>generated, tested in CI, released on GitHub</span>
 						<a href="https://github.com/effectified/engine">source</a>
 					</div>
 				</div>
@@ -326,6 +330,7 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 					<thead>
 						<tr>
 							<th>Facade</th>
+							<th class="kind-col">Kind</th>
 							<th class="kind-col">Weekly</th>
 							<th class="wraps-col">Tested against</th>
 							<th>What it exercises</th>
@@ -335,14 +340,17 @@ const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0
 						{ENGINE_TARGETS.map((target) => (
 							<tr>
 								<td class="name">
-									<a href={`https://github.com/effectified/engine/tree/main/targets/${target.library}`}>
+									<a href={`https://github.com/effectified/engine/releases/tag/${encodeURIComponent(target.release)}`}>
 										<span class="scope">@effectified/</span>
 										{target.facade.replace("@effectified/", "")}
 									</a>
 								</td>
+								<td class="kind kind-col">{target.kind === "ui" ? "Effect UI" : "runtime"}</td>
 								<td class="kind kind-col">{weekly(target.weekly)}</td>
 								<td class="wraps wraps-col">{target.against} · {target.tests} tests</td>
-								<td>{target.library} {target.version}: {target.exercises}.</td>
+								<td>
+									<a href={`https://github.com/effectified/engine/tree/main/targets/${target.directory}`}>{target.library} {target.version}</a>: {target.exercises}.
+								</td>
 							</tr>
 						))}
 					</tbody>
