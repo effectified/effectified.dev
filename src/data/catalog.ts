@@ -163,3 +163,24 @@ export const totals = {
 export function tarballUrl(family: Family, pkg: Package): string {
 	return `${family.release.base}/${family.scope.slice(1)}-${pkg.name}-${family.release.version}.tgz`;
 }
+
+/** A library the engine has effectified and tested, not yet released as a family of its own. */
+export interface EngineTarget {
+	readonly library: string;
+	readonly version: string;
+	/** npm's weekly downloads of the library, read on 2026-11-26. */
+	readonly weekly: number;
+	readonly facade: string;
+	readonly exercises: string;
+	readonly tests: number;
+	readonly against: string;
+}
+
+/** The engine's targets (effectified/engine, targets/): generated from each library's types, tested against it. */
+export const ENGINE_TARGETS: ReadonlyArray<EngineTarget> = [
+	{ library: "sharp", version: "0.35.5", weekly: 169_054_598, facade: "@effectified/sharp", exercises: "a builder that is also a Node stream", tests: 2, against: "libvips" },
+	{ library: "nodemailer", version: "10.6.1", weekly: 40_428_669, facade: "@effectified/nodemailer", exercises: "a scoped transport, error codes", tests: 3, against: "a JSON transport, a refused SMTP port" },
+	{ library: "puppeteer-core", version: "25.19.0", weekly: 34_744_076, facade: "@effectified/puppeteer-core", exercises: "16 handles, scoped browser and pages", tests: 3, against: "Chrome" },
+	{ library: "simple-git", version: "4.1.0", weekly: 14_877_551, facade: "@effectified/simple-git", exercises: "chainable thenables, generics kept", tests: 2, against: "git" },
+	{ library: "bullmq", version: "6.7.10", weekly: 13_747_764, facade: "@effectified/bullmq", exercises: "generic constructors, events as Streams", tests: 2, against: "Redis" },
+];

@@ -5,7 +5,7 @@ import Install from "../components/Install.astro";
 import Scene from "../components/Scene.astro";
 import Base from "../layouts/Base.astro";
 import { effectifiedDark } from "../code-theme";
-import { FAMILIES, KINDS, tarballUrl, totals, type Kind } from "../data/catalog";
+import { ENGINE_TARGETS, FAMILIES, KINDS, tarballUrl, totals, type Kind } from "../data/catalog";
 
 // The Pi family and its composition, the one package a product installs first.
 const [pi] = FAMILIES;
@@ -54,13 +54,15 @@ const answer = Effect.gen(function* () {
   Effect.provide(Models.layer([anthropicProvider()])),
 );`;
 
-const recipe = `// proposed format
-recipe("@earendil-works/pi-ai", {
-  service: "Models",
-  effects: ["complete", "stream"],
-  errors: { stopReason: "ModelRequestError" },
-  cancel: "fiber",
-})`;
+// An excerpt of targets/nodemailer/recipe.json in effectified/engine, as the engine drafted it.
+const recipe = `{
+  "exports": ["createTransport", "createTestAccount"],
+  "handles": { "Mail": { "release": "close", "events": [] } },
+  "errors": [{ "tag": "NodemailerError", "codes": ["ECONNECTION", "EAUTH", "EENVELOPE"] }],
+  "services": [{ "name": "NodemailerMail", "handle": "Mail", "acquire": "createTransport" }]
+}`;
+
+const make = `node src/bin.ts make https://github.com/taskforcesh/bullmq`;
 
 const contract = [
 	["Effect, Stream or Layer", "Every public function returns one. No promise, callback or any in a public signature."],
@@ -72,6 +74,9 @@ const contract = [
 ] as const;
 
 const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
+
+const weekly = (downloads: number) => `${Math.round(downloads / 1_000_000)}M`;
+const engineTests = ENGINE_TARGETS.reduce((sum, target) => sum + target.tests, 0);
 ---
 
 <Base
@@ -172,9 +177,9 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 				<span class="label">// How it works</span>
 				<h2>Decide once. <span class="dim">Then keep up for free.</span></h2>
 				<p class="lede">
-					A person decides how a library maps to Effect. After that the work is mechanical, and mechanical
-					work belongs to a machine. Today the first step is done by hand; the rest is what this
-					organization is for.
+					Give the engine a GitHub URL. It reads the library's types with TypeScript 7 and its source with
+					ast-grep, drafts every decision the types cannot make, writes the facade, and checks it against
+					upstream until the compiler agrees. Agents review the decisions; a daily job follows upstream.
 				</p>
 			</div>
 		</div>
@@ -188,26 +193,27 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 						Which calls become Effects, which failures become tagged errors, what becomes a service, who
 						owns cancellation.
 					</p>
-					<span class="chip pass">✓ Today · by hand</span>
-					<Code code={recipe} lang="ts" theme={effectifiedDark} />
+					<span class="chip pass">✓ drafted by the engine · reviewed by agents</span>
+					<Code code={recipe} lang="json" theme={effectifiedDark} />
 				</div>
 				<div class="station glass reveal" style="--delay: 90ms">
 					<span class="step">02 · GENERATOR</span>
 					<h3>Write the facade</h3>
 					<p>
-						Reads upstream's type declarations and the recipe, and writes the facade, its errors and its
-						conformance test. The same input always writes the same output.
+						Writes the facade with its types derived from upstream's, every overload and generic kept, and
+						every spec checked against upstream's types. The same input always writes the same bytes.
 					</p>
-					<span class="chip warn">▲ Roadmap</span>
+					<span class="chip pass">✓ effectified/engine</span>
+					<Code code={make} lang="sh" theme={effectifiedDark} />
 				</div>
 				<div class="station glass reveal" style="--delay: 180ms">
 					<span class="step">03 · UPSTREAM WATCH</span>
 					<h3>Follow every release</h3>
 					<p>
-						Watches upstream releases, regenerates, runs the tests and opens a pull request. A change the
-						recipe can't place asks a person instead of guessing.
+						Every day: a new upstream release is studied, its drift written down, the facade regenerated and
+						tested, and a pull request opened. A change the recipe can't place goes to an agent.
 					</p>
-					<span class="chip warn">▲ Roadmap · today a sync script</span>
+					<span class="chip pass">✓ daily sync</span>
 				</div>
 			</div>
 		</div>
@@ -294,6 +300,55 @@ const kinds = Object.entries(KINDS) as Array<[Kind, string]>;
 				</div>
 				<Install family={pi} pkg={thread} />
 			</div>
+		</div>
+	</section>
+
+	<section class="room" id="engine">
+		<div class="wrap">
+			<div class="room-head reveal">
+				<span class="label">// From the engine</span>
+				<h2>{ENGINE_TARGETS.length} famous libraries, <span class="spectrum">effectified.</span></h2>
+				<p class="lede">
+					None had an Effect wrapper on npm, in Effect itself or in Distilled. The engine generated each facade
+					from the library's own types, and {engineTests} behaviour tests run it against the real thing.
+				</p>
+			</div>
+			<div class="family reveal">
+				<div class="family-head">
+					<h3>effectified/engine</h3>
+					<div class="meta">
+						<span>TypeScript 7 · ast-grep · Effect 4</span>
+						<span class="warn">▲ generated and tested · not yet released</span>
+						<a href="https://github.com/effectified/engine">source</a>
+					</div>
+				</div>
+				<table class="pkgs">
+					<thead>
+						<tr>
+							<th>Facade</th>
+							<th class="kind-col">Weekly</th>
+							<th class="wraps-col">Tested against</th>
+							<th>What it exercises</th>
+						</tr>
+					</thead>
+					<tbody>
+						{ENGINE_TARGETS.map((target) => (
+							<tr>
+								<td class="name">
+									<a href={`https://github.com/effectified/engine/tree/main/targets/${target.library}`}>
+										<span class="scope">@effectified/</span>
+										{target.facade.replace("@effectified/", "")}
+									</a>
+								</td>
+								<td class="kind kind-col">{weekly(target.weekly)}</td>
+								<td class="wraps wraps-col">{target.against} · {target.tests} tests</td>
+								<td>{target.library} {target.version}: {target.exercises}.</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
+			<p class="note"><span class="quiet">Weekly downloads: npm, last week of November 2026.</span></p>
 		</div>
 	</section>
 
