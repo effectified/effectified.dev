@@ -10,7 +10,7 @@ export interface Package {
 	/** The upstream packages it wraps or builds on, with the pinned version. */
 	readonly wraps: ReadonlyArray<string>;
 	readonly summary: string;
-	/** Not in the release: private like the upstream package it wraps, used from a checkout. */
+	/** Not on npm: private like the upstream package it wraps, used from a checkout. */
 	readonly private?: true;
 }
 
@@ -20,11 +20,9 @@ export interface Family {
 	readonly title: string;
 	readonly upstream: { readonly name: string; readonly url: string; readonly version: string };
 	readonly repo: string;
-	/** The npm scope of the family's packages. */
+	/** The npm scope of the family's packages: each installs from npm as `<scope>/<name>`. */
 	readonly scope: string;
 	readonly status: "alpha";
-	/** The GitHub release the packages install from: `<base>/<scope>-<name>-<version>.tgz`. */
-	readonly release: { readonly tag: string; readonly version: string; readonly base: string };
 	readonly effect: string;
 	readonly packages: ReadonlyArray<Package>;
 }
@@ -47,11 +45,6 @@ export const FAMILIES: ReadonlyArray<Family> = [
 		repo: "https://github.com/effectified/pi",
 		scope: "@effectified",
 		status: "alpha",
-		release: {
-			tag: "v0.2.0",
-			version: "0.2.0",
-			base: "https://github.com/effectified/pi/releases/download/v0.2.0",
-		},
 		effect: "~4.1.5",
 		packages: [
 			{
@@ -209,8 +202,3 @@ export const totals = {
 	packages: FAMILIES.reduce((sum, family) => sum + family.packages.length, 0),
 	upstream: new Set(FAMILIES.flatMap((family) => family.packages.flatMap((pkg) => pkg.wraps.map((w) => `${family.id}/${w}`)))).size,
 };
-
-/** The release URL of a package's tarball, as `npm pack` names it. */
-export function tarballUrl(family: Family, pkg: Package): string {
-	return `${family.release.base}/${family.scope.slice(1)}-${pkg.name}-${family.release.version}.tgz`;
-}

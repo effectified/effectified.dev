@@ -381,7 +381,7 @@ h3 { font-size: 1.25rem; font-weight: 600; line-height: 1.25; letter-spacing: -0
 .closing h2 .dim { display: block; }
 .closing-install { margin-top: clamp(48px, 16vw, 300px); max-width: 980px; }
 
-/* Install: one package from its GitHub release, per package manager */
+/* Install: one package from npm, per package manager */
 
 .install {
 	border: 1px solid var(--line-strong);
