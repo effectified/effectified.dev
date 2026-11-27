@@ -48,10 +48,9 @@ The Pi family and its packages are in [`src/data/catalog.ts`](src/data/catalog.t
 [effectified/packages](https://github.com/effectified/packages) are a content collection
 ([`src/content.config.ts`](src/content.config.ts)): each one's `docs.json` and `SKILL.md`, which the engine generates
 into it, read from a checkout of that repository (`EFFECTIFIED_PACKAGES`, a sibling `../packages`, or a shallow clone).
-Each facade gets a page (`/<name>`) with its examples, its frontend demo, its API and its skill (`/<name>/SKILL.md`).
-The build also writes `_redirects`: `/<name>.tgz` is the tarball of each package's newest release, so the page never
-names a version. The counts on the page are computed at build time; never write a number or a version into the page
-by hand.
+Each facade gets a page (`/<name>`) with its examples, its frontend demo (unpacked from its GitHub release at build
+time), its API and its skill (`/<name>/SKILL.md`). Every package installs from npm by name, so the page never names a
+version. The counts on the page are computed at build time; never write a number or a version into the page by hand.
 
 ## Brand
 

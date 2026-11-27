@@ -3,19 +3,17 @@
 // page; without JavaScript the npm one shows and can be selected by hand.
 
 interface Props {
-	/** The tarball: `https://effectified.dev/<name>.tgz`, which always installs the newest release. */
-	url: string;
-	/** Further packages to install with it (Effect UI's snapshot build, say). */
-	extra?: string | undefined;
-	/** Whether the package's own dependencies are tarball URLs, which pnpm installs only when told to. */
-	urlDependencies?: boolean;
+	/** The package, installed from npm by name: its newest version. */
+	name: string;
+	/** Effect UI's snapshot build, a URL installed beside a frontend facade; npm installs a URL only when told to. */
+	effectUi?: string | undefined;
 }
 
-const { url, extra, urlDependencies = false } = Astro.props;
-const rest = `${url} effect${extra === undefined ? "" : ` ${extra}`}`;
+const { name, effectUi } = Astro.props;
+const rest = `${name} effect${effectUi === undefined ? "" : ` ${effectUi}`}`;
 const managers = [
-	{ id: "npm", command: `npm install --allow-remote=all ${rest}` },
-	{ id: "pnpm", command: `pnpm add ${urlDependencies ? "--config.block-exotic-subdeps=false " : ""}${rest}` },
+	{ id: "npm", command: `npm install ${effectUi === undefined ? "" : "--allow-remote=root "}${rest}` },
+	{ id: "pnpm", command: `pnpm add ${rest}` },
 	{ id: "bun", command: `bun add ${rest}` },
 ] as const;
 ---

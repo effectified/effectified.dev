@@ -47,7 +47,6 @@ jobs:
       - name: Check and build
         env:
           EFFECTIFIED_PACKAGES: ${{ github.workspace }}/.packages
-          GITHUB_TOKEN: ${{ github.token }}
         run: |
           pnpm check
           pnpm build

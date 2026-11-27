@@ -1,6 +1,6 @@
 ---
 // One facade's page, generated from the docs.json and SKILL.md the engine writes into it in effectified/packages:
-// what it is, how to install its newest release, its examples (a frontend facade's beside the live demo that runs
+// what it is, how to install it from npm, its examples (a frontend facade's beside the live demo that runs
 // them), its API, and the skill an agent follows to use it. Nothing here is written per facade.
 import { Code } from "astro:components";
 import { getCollection } from "astro:content";
@@ -21,7 +21,7 @@ export async function getStaticPaths() {
 const { facade } = Astro.props;
 const { api } = facade;
 const ui = facade.kind === "ui";
-const releases = facade.source.replace(/\/tree\/main\/.*$/, `/releases?q=${encodeURIComponent(facade.slug)}`);
+const notes = facade.source.replace(/\/tree\/main\/.*$/, `/releases/tag/${facade.install.tag}`);
 const list = (names: ReadonlyArray<string>) => (names.length === 0 ? "–" : names.join(", "));
 const effects = api.handles.reduce((sum, handle) => sum + handle.effects.length, 0);
 const streams = api.handles.reduce((sum, handle) => sum + handle.streams.length + handle.events.length, 0);
@@ -60,10 +60,11 @@ const facts = ui
 				))}
 			</dl>
 			<div class="facade-install">
-				<Install url={facade.install.latest} extra={facade.install.effectUi} />
+				<Install name={facade.name} effectUi={facade.install.effectUi} />
 				<p class="note">
 					<span class="quiet">
-						Always the newest release. To pin one, install its tarball from the <a href={releases}>releases</a>.
+						<a href={facade.install.npm}>On npm</a>, published by the release workflow of effectified/packages with a
+						provenance attestation. <a href={notes}>Release notes</a>.
 						{ui ? " Effect UI is in public preview: its snapshot build installs with it." : ""}
 					</span>
 				</p>

@@ -7,7 +7,7 @@ import Scene from "../components/Scene.astro";
 import Base from "../layouts/Base.astro";
 import { effectifiedDark } from "../code-theme";
 import { FAMILIES, KINDS, totals, type Kind } from "../data/catalog";
-import { type Facade, piLatestUrl } from "../data/packages";
+import type { Facade } from "../data/packages";
 
 // The Pi family and its composition, the one package a product installs first.
 const [pi] = FAMILIES;
@@ -270,7 +270,7 @@ const engineTests = facades.reduce((sum, facade) => sum + facade.tests, 0);
 													{pkg.name}
 												</span>
 											) : (
-												<a href={piLatestUrl(pkg.name)} title="Tarball of the newest release">
+												<a href={`https://www.npmjs.com/package/${family.scope}/${pkg.name}`} title="Its page on npm">
 													<span class="scope">{family.scope}/</span>
 													{pkg.name}
 												</a>
@@ -298,14 +298,14 @@ const engineTests = facades.reduce((sum, facade) => sum + facade.tests, 0);
 			</div>
 			<div class="release reveal">
 				<div>
-					<span class="label">// Install from GitHub</span>
+					<span class="label">// Install from npm</span>
 					<p>
-						Released on GitHub, not npm. One URL installs a package with every effectified package it needs;
-						Pi and <code>effect</code> come from npm. The URL always installs the newest release.{" "}
+						On npm, under <code>{pi.scope}</code>: each repository's own workflow publishes its packages, with a
+						provenance attestation. A package brings every Effectified package it needs, and Pi with it.{" "}
 						<a href={`${pi.repo}/releases`}>Release notes</a>
 					</p>
 				</div>
-				<Install url={piLatestUrl(thread.name)} urlDependencies />
+				<Install name={`${pi.scope}/${thread.name}`} />
 			</div>
 		</div>
 	</section>
@@ -329,7 +329,7 @@ const engineTests = facades.reduce((sum, facade) => sum + facade.tests, 0);
 					<h3>effectified/packages</h3>
 					<div class="meta">
 						<span>made by <a href="https://github.com/effectified/engine">effectified/engine</a> · TypeScript 7 · ast-grep · Effect 4</span>
-						<span>generated, tested in CI, released on GitHub</span>
+						<span>generated, tested in CI, published to npm</span>
 						<a href="https://github.com/effectified/packages">source</a>
 						<a href="https://github.com/effectified/packages/blob/main/CONTRIBUTING.md">contribute</a>
 					</div>
@@ -384,7 +384,7 @@ const engineTests = facades.reduce((sum, facade) => sum + facade.tests, 0);
 				<a class="btn btn-ghost" href="https://github.com/effectified">github.com/effectified</a>
 			</div>
 			<div class="closing-install">
-				<Install url={piLatestUrl(thread.name)} urlDependencies />
+				<Install name={`${pi.scope}/${thread.name}`} />
 			</div>
 		</div>
 	</section>
